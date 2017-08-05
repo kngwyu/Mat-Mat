@@ -10,7 +10,7 @@
 #define  EPS    1.0e-18
 #define  FILL(a, n, x) do{int i;for(i=0;i<n;++i){a[i]=x;}}while(0);
 
-int myid, nprocs;
+int myid, numprocs;
 void MyMatMat(double* c, double* a, double* b, int n);
 int main(int argc, char* argv[]) {
     double  t0, t1, t2, t_w;
@@ -28,14 +28,14 @@ int main(int argc, char* argv[]) {
     if (DEBUG == 1) {
         FILL(a, N * N, 1.0);
         FILL(b, N * N, 1.0);
-        FILL(c, N * N, 1.0);        
+        FILL(c, N * N, 0.0);        
     } else {
         srand(myid);
         dc_inv = 1.0 / (double)RAND_MAX;
         for (i = 0; i < N * N; ++i) {
             a[i] = rand() * dc_inv;
             b[i] = rand() * dc_inv;
-            c[i] = 1.0;
+            c[i] = 0.0;
         }
     }
     /* end of matrix generation --------------------------*/
@@ -87,7 +87,7 @@ void MyMatMat(double* c, double* a, double* b, int n) {
     for (i = 0; i < n; ++i)
         for(j = 0; j < n; ++j)
             for (k = 0; k < n; ++k)
-                c[i * n + j] = a[i * n + k] + b[k * n + j];
+                c[i * n + j] += a[i * n + k] * b[k * n + j];
 }
 
 

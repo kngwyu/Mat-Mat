@@ -13,7 +13,7 @@
 #define  FILL(a, n, x) do{int i;for(i=0;i<n;++i){a[i]=x;}}while(0);
 #define  COPY(a, b, n) do{int i;for(i=0;i<n;++i){b[i]=a[i];}}while(0);
 
-int myid, nprocs;
+int myid, numprocs;
 void MyMatMat(double* c, double* a, double* b, int n);
 int main(int argc, char* argv[]) {
     double  t0, t1, t2, t_w;
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
         iflag = 0;
         for(i = 0; i < N * block_len; ++i) {
             for (j = 0; j < N; ++j) {
-                if (fabs(c[i * N + j] - (double)N) > EPS) {
+                if (fabs(c[i * block_len + j] - (double)N) > EPS) {
                     printf(" Error! in ( %d , %d )-th argument in PE %d \n",j, i, myid);
                     iflag = 1;
                     ierr = MPI_Finalize();
@@ -104,19 +104,18 @@ void MyMatMat(double* c, double* a, double* b, int n) {
     irecvPE = (myid + 1) % numprocs;
     int jstart, block_len;
     {
-        int istart = (N / NPROCS) * myid;
-        int iend = MIN(istart + N / NPROCS, N);
+        int istart = (n / numprocs) * myid;
+        int iend = MIN(istart + n / numprocs, n);
         block_len = iend - istart;
     }
     double* buf = (double*)malloc(sizeof(b));
-    
     for (process_i = 0; process_i < numprocs; ++process_i) {
         jstart = block_len * ((process_i + myid) % numprocs);
         for(i = 0; i < block_len; ++i) { // iは毎回同じ
             for(j = 0; j < block_len; ++j) { // jは右にずれる
-                c[i * n + j + jstart] = 0;
+	      //                c[i * block_len + j + jstart] = 0;
                 for (k = 0; k < n; ++k) {
-                    c[i * n + j + jstart] += a[i * n + k] * b[k * n + j]; 
+                    c[i * block_len + j] += a[i * block_len + k] * b[k * n + j]; 
                 }
             }
         }
