@@ -11,7 +11,7 @@
 #define  FILL(a, n, x) do{int i;for(i=0;i<n;++i){a[i]=x;}}while(0);
 
 int myid, numprocs;
-void MyMatMat(double* c, double* a, double* b);
+void MyMatMat(double c[N][N], double a[N][N], double b[N][N]);
 int main(int argc, char* argv[]) {
     double  t0, t1, t2, t_w;
     double  dc_inv, d_mflops;
@@ -85,7 +85,7 @@ END:
     exit(0);
 }
 
-void MyMatMat(double* c, double* a, double* b) {
+void MyMatMat(double c[N][N], double a[N][N], double b[N][N]) {
     int i, j, k;
     for (i = 0; i < N; ++i)
         for(j = 0; j < N; ++j)
