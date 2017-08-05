@@ -9,30 +9,18 @@
 #define  DEBUG  1
 #define  EPS    1.0e-18
 
-double  A[N/NPROCS][N];
-double  B[N][N/NPROCS];
-double  C[N/NPROCS][N];
-
-double  B_T[N][N/NPROCS];
-
-int     myid, numprocs;
-
-void MyMatMat(double* c,
-              double* a, double* b, int n); 
-
+void MatMat0(double* c, double* a, double* b, int n);
+void MatMat1(double* c, double* a, double* b, int n);
 int main(int argc, char* argv[]) {
 
      double  t0, t1, t2, t_w;
      double  dc_inv, d_mflops;
-
      int     ierr;
      int     i, j;      
      int     iflag, iflag_t;
-
      ierr = MPI_Init(&argc, &argv);
      ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
      ierr = MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-
      /* matrix generation --------------------------*/
      if (DEBUG == 1) {
        for(j=0; j<N/NPROCS; j++) {
@@ -46,11 +34,9 @@ int main(int argc, char* argv[]) {
            B[j][i] = 1.0;
          }
        }
-
      } else {
        srand(myid);
        dc_inv = 1.0/(double)RAND_MAX;
- 
       for(j=0; j<N/NPROCS; j++) {
          for(i=0; i<N; i++) {
            A[j][i] = rand()*dc_inv;
@@ -115,12 +101,19 @@ int main(int argc, char* argv[]) {
      exit(0);
 }
 
-void MyMatMat(double C[N/NPROCS][N], 
+void MatMat0(double* c, double* a, double* b, int n) {
+    int i, j, k;
+    for (i = 0; i < n; ++i)
+        for(j = 0; j < n; ++j)
+            for (k = 0; k < n; ++k)
+                c[i * n + j] = a[i * n + k] + b[k * n + j];
+}
+void MatMat1(double C[N/NPROCS][N], 
               double A[N/NPROCS][N], double B[N][N/NPROCS], int n) 
 {
      int  i, j, k;
      int  block_len;
-     int ierr;
+     int  ierr;
      int  jstart; 
      int  isendPE, irecvPE;
      int process_i;
@@ -154,3 +147,5 @@ void MyMatMat(double C[N/NPROCS][N],
            B[i][j] = B_T[i][j];
      }
 }
+
+
