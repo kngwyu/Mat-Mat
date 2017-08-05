@@ -11,7 +11,7 @@
 #define  FILL(a, n, x) do{int i;for(i=0;i<n;++i){a[i]=x;}}while(0);
 
 int myid, numprocs;
-void MyMatMat(double* c, double* a, double* b, int n);
+void MyMatMat(double* c, double* a, double* b);
 int main(int argc, char* argv[]) {
     double  t0, t1, t2, t_w;
     double  dc_inv, d_mflops;
@@ -21,28 +21,34 @@ int main(int argc, char* argv[]) {
     ierr = MPI_Init(&argc, &argv);
     ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
     ierr = MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-    double* a = (double*)malloc(sizeof(double) * N * N);
-    double* b = (double*)malloc(sizeof(double) * N * N);
-    double* c = (double*)malloc(sizeof(double) * N * N);
+    static double a[N][N];
+    static double b[N][N];
+    static double c[N][N];
     /* matrix generation --------------------------*/
     if (DEBUG == 1) {
-        FILL(a, N * N, 1.0);
-        FILL(b, N * N, 1.0);
-        FILL(c, N * N, 0.0);        
+        for (i = 0; i < N; ++i) {
+            for (j = 0; j < N; ++j) {
+                a[i][j] = 1.0;
+                b[i][j] = 1.0;
+                c[i][j] = 0.0;
+            }
+        }
     } else {
         srand(myid);
         dc_inv = 1.0 / (double)RAND_MAX;
-        for (i = 0; i < N * N; ++i) {
-            a[i] = rand() * dc_inv;
-            b[i] = rand() * dc_inv;
-            c[i] = 0.0;
+        for (i = 0; i < N; ++i) {
+            for (j = 0; j < N; ++j) {
+                a[i][j] = rand() * dc_inv;
+                b[i][j] = rand() * dc_inv;
+                c[i][j] = 0.0;
+            }
         }
     }
     /* end of matrix generation --------------------------*/
     /* Start of mat-vec routine ----------------------------*/
     ierr = MPI_Barrier(MPI_COMM_WORLD);
     t1 = MPI_Wtime();
-    MyMatMat(c, a, b, N);
+    MyMatMat(c, a, b);
     ierr = MPI_Barrier(MPI_COMM_WORLD);
     t2 = MPI_Wtime();
     t0 =  t2 - t1; 
@@ -60,7 +66,7 @@ int main(int argc, char* argv[]) {
         iflag = 0;
         for(i = 0; i < N; ++i) {
             for (j = 0; j < N; ++j) {
-                if (fabs(c[i * N + j] - (double)N) > EPS) {
+                if (fabs(c[i][j] - (double)N) > EPS) {
                     printf(" Error! in ( %d , %d )-th argument in PE %d \n",j, i, myid);
                     iflag = 1;
                     ierr = MPI_Finalize();
@@ -76,18 +82,15 @@ int main(int argc, char* argv[]) {
     }
 END:
     ierr = MPI_Finalize();
-    free(a);
-    free(b);
-    free(c);
     exit(0);
 }
 
-void MyMatMat(double* c, double* a, double* b, int n) {
+void MyMatMat(double* c, double* a, double* b) {
     int i, j, k;
-    for (i = 0; i < n; ++i)
-        for(j = 0; j < n; ++j)
-            for (k = 0; k < n; ++k)
-                c[i * n + j] += a[i * n + k] * b[k * n + j];
+    for (i = 0; i < N; ++i)
+        for(j = 0; j < N; ++j)
+            for (k = 0; k < N; ++k)
+                c[i][j] += a[i][k] * b[k][j];
 }
 
 
