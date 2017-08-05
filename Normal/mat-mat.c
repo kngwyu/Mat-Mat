@@ -11,8 +11,6 @@
 #define  EPS    1.0e-18
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
-#define  FILL(a, n, x) do{int i;for(i=0;i<n;++i){a[i]=x;}}while(0);
-#define  COPY(a, b, n) do{int i;for(i=0;i<n;++i){b[i]=a[i];}}while(0);
 
 int myid, numprocs;
 void MyMatMat(double* c, double* a, double* b);
