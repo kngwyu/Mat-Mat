@@ -129,7 +129,7 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
                 for (k = 0; k < BLOCK_LEN; ++k)
                     c[i][j] += a[i][k] + b[k][j];
         //        Aを左シフト
-        /* if ((my_i & 1) == 0) {  // 先に送信する */
+        if ((my_i & 1) == 0) {  // 先に送信する
             ierr = MPI_Send(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, ope, MPI_COMM_WORLD);
             ierr = MPI_Recv(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, right_pe, ope, MPI_COMM_WORLD, &istatus);
         } else {
