@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     static double a[BLOCK_LEN][BLOCK_LEN];
     static double b[BLOCK_LEN][BLOCK_LEN];
     static double c[BLOCK_LEN][BLOCK_LEN];
-    int my_i = myid / BLOCK_LEN, my_j = myid % BLOCK_LEN;
+    int my_i = myid / PROC_SQRT, my_j = myid % PROC_SQRT;
     /* matrix generation --------------------------*/
     if (DEBUG == 1) {
         for (i = 0; i < BLOCK_LEN; ++i) {
