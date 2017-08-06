@@ -1,3 +1,4 @@
+// 単純な並列化をした行列積
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -59,7 +60,7 @@ int main(int argc, char* argv[]) {
         }
     } /* end of matrix generation --------------------------*/
 
-    /* Start of mat-vec routine ----------------------------*/
+    /* Start of routine ----------------------------*/
     ierr = MPI_Barrier(MPI_COMM_WORLD);
     t1 = MPI_Wtime();
     MyMatMat(c, a, b);
@@ -67,7 +68,7 @@ int main(int argc, char* argv[]) {
     t2 = MPI_Wtime();
     t0 =  t2 - t1; 
     ierr = MPI_Reduce(&t0, &t_w, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-    /* End of mat-vec routine --------------------------- */
+    /* End of routine --------------------------- */
 
     if (myid == 0) {
 
