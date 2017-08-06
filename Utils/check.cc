@@ -18,8 +18,8 @@ int main() {
     int i, j;
     double d;
     while (ifs >> i >> j >> d) {
-      cout << d << endl;
-      if(fabs(mp[make_pair(i, j)] - d) > 1.0e-6)
-	cout << i << ' ' << j << ' ' << d << ' ' << mp[make_pair(i, j)] << endl;
+        cout << d << endl;
+        if(fabs(mp[make_pair(i, j)] - d) > 1.0e-6)
+            cout << i << ' ' << j << ' ' << d << ' ' << mp[make_pair(i, j)] << endl;
     }
 }

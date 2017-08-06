@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     ierr = MPI_Reduce(&t0, &t_w, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
     /* End of routine ----------------------------*/
     
-    if (myid == 0) {
+    if (PRINT == 0 && myid == 0) {
         printf("N  = %d \n", N);
         printf("Mat-Mat time  = %lf [sec.] \n",t_w);
     }
