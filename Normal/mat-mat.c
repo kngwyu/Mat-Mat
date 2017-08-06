@@ -3,8 +3,8 @@
 #include <math.h>
 #include <mpi.h>
 
-#define  N        512
-#define  NPROCS   256
+#define  N        576
+#define  NPROCS   288
 #define  (N / NPROCS)
 
 #define  DEBUG  1
