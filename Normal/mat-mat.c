@@ -5,7 +5,7 @@
 
 #define  N        576
 #define  NPROCS   288
-#define  (N / NPROCS)
+#define  BLOCK_LEN (N / NPROCS)
 
 #define  DEBUG  1
 #define  EPS    1.0e-18
@@ -13,7 +13,7 @@
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
 
 int myid, numprocs;
-void MyMatMat(double* c, double* a, double* b);
+void MyMatMat(double c[BLOCK_LEN][N], double a[BLOCK_LEN][N], double b[N][BLOCK_LEN]);
 int main(int argc, char* argv[]) {
     double  t0, t1, t2, t_w;
     double  dc_inv, d_mflops;
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
         }
         for (i = 0; i < N; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
-                b[i][j] = rand() * dc_inv();
+                b[i][j] = rand() * dc_inv;
             }
         }
     } /* end of matrix generation --------------------------*/
@@ -104,7 +104,7 @@ END:
     exit(0);
 }
 
-void MyMatMat(double* c, double* a, double* b) {
+void MyMatMat(double c[BLOCK_LEN][N], double a[BLOCK_LEN][N], double b[N][BLOCK_LEN]) {
     int  i, j, k;
     int  ierr;
     int  isendPE, irecvPE;
