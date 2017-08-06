@@ -7,9 +7,9 @@
 #define  N        512
 #define  NPROCS   256
 
-#define  DEBUG  1
+#define  DEBUG  0
+#define  PRINT  1
 #define  EPS    1.0e-18
-#define  FILL(a, n, x) do{int i;for(i=0;i<n;++i){a[i]=x;}}while(0);
 
 int myid, numprocs;
 void MyMatMat(double c[N][N], double a[N][N], double b[N][N]);
@@ -78,6 +78,10 @@ int main(int argc, char* argv[]) {
         if (myid == 0) {
             if (iflag_t == 0) printf(" OK! \n");
         }       
+    } else {
+        for (i = 0; i < N; ++i)
+            for (j = 0; j < N; ++j)
+                printf("%d %d %d\n", i, j, c[i][j]);
     }
 END:
     ierr = MPI_Finalize();

@@ -8,7 +8,8 @@
 #define  NPROCS   256
 #define  BLOCK_LEN 16
 
-#define  DEBUG  1
+#define  DEBUG  0
+#define  PRINT  1
 #define  EPS    1.0e-18
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
@@ -94,6 +95,12 @@ int main(int argc, char* argv[]) {
         if (myid == 0) {
             if (iflag_t == 0) printf(" OK! \n");
         }
+    }
+    if (PRINT == 1) {
+        int my_i = myid / BLOCK_LEN, my_j = myid % BLOCK_LEN;
+        for (i = 0; i < BLOCK_LEN; ++i)
+            for (j = 0; j < BLOCK_LEN; ++j)
+                printf("%d %d %lf\n", i + my_i * BLOCK_LEN, j + my_j * BLOCK_LEN, c[i][j]);
     }
 END:
     ierr = MPI_Finalize();

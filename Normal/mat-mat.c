@@ -8,7 +8,8 @@
 #define  NPROCS   256
 #define  BLOCK_LEN (N / NPROCS)
 
-#define  DEBUG  1
+#define  DEBUG  0
+#define  PRINT  1
 #define  EPS    1.0e-18
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
@@ -69,12 +70,10 @@ int main(int argc, char* argv[]) {
     t0 =  t2 - t1; 
     ierr = MPI_Reduce(&t0, &t_w, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
     /* End of routine --------------------------- */
-
     if (myid == 0) {
         printf("N  = %d \n",N);
         printf("Mat-Mat time  = %lf [sec.] \n",t_w);
     }
-
     if (DEBUG == 1) {
         /* Verification routine ----------------- */
         iflag = 0;
@@ -92,8 +91,13 @@ int main(int argc, char* argv[]) {
         MPI_Reduce(&iflag, &iflag_t, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
         if (myid == 0) {
             if (iflag_t == 0) printf(" OK! \n");
+        }        
+    } else {
+        for (i = 0; i < BLOCK_LEN; ++i) {
+            for (j = 0; j < N; ++j) {
+                printf("%d %d %d", i + myid * BLOCK_LEN, j, c[i][j]);
+            }
         }
-
     }
 END:
     ierr = MPI_Finalize();
