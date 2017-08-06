@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     if (PRINT == 1) {
         for (i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < N; ++j) {
-                printf("%d %d %lf", i + myid * BLOCK_LEN, j, c[i][j]);
+                printf("%d %d %lf\n", i + myid * BLOCK_LEN, j, c[i][j]);
             }
         }
     }

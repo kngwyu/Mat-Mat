@@ -23,6 +23,8 @@ int main() {
     ifstream ifs(s);
     int i, j;
     double d;
-    while (ifs >> i >> j >> d) 
+    while (ifs >> i >> j >> d) {
+      cerr << i << ' ' << j << ' ' << d << ' ' << mp[make_pair(i, j)] << endl;
         assert(fabs(mp[make_pair(i, j)] - d) < 1.0e-6);
+    }
 }
