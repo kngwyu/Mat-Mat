@@ -4,7 +4,7 @@
 #include <math.h>
 #include <mpi.h>
 
-#define  N        512
+#define  N        1024
 #define  NPROCS   256
 
 #define  DEBUG  0

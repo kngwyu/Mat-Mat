@@ -4,10 +4,10 @@
 #include <math.h>
 #include <mpi.h>
 
-#define  N        512
+#define  N        1024
 #define  NPROCS   256
 #define  PROC_SQRT 16
-#define  BLOCK_LEN 16
+#define  BLOCK_LEN 64
 
 #define  DEBUG  0
 #define  PRINT  1
@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         puts("PROC_SQRT * PROC_SQRT != NPROCS");
         exit(0);
     }
-    if (NPROCS * BLOCK_LEN * BLOCK_LEN != N * N) {
+    if (BLOCK_LEN * PROC_SQRT != N * N) {
         puts("NPROCS * BLOCK_LEN * BLOCK_LEN != N * N");
         exit(0);
     }
