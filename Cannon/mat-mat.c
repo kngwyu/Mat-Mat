@@ -6,6 +6,7 @@
 
 #define  N        512
 #define  NPROCS   256
+#define  PROC_SQRT 16
 #define  BLOCK_LEN 16
 
 #define  DEBUG  0
@@ -27,12 +28,12 @@ int main(int argc, char* argv[]) {
         puts("N % NPROCS != 0");
         exit(0);
     }
-    if (BLOCK_LEN * BLOCK_LEN != NPROCS) {
-        puts("BLOCK_LEN * BLOCK_LEN != NPROCS");
+    if (PROC_SQRT * PROC_SQRT != NPROCS) {
+        puts("PROC_SQRT * PROC_SQRT != NPROCS");
         exit(0);
     }
-    if (N % BLOCK_LEN != 0) {
-        puts("N % BLOCK_LEN != 0");
+    if (NPROCS * BLOCK_LEN * BLOCK_LEN != N * N) {
+        puts("NPROCS * BLOCK_LEN * BLOCK_LEN != N * N");
         exit(0);
     }
     
@@ -117,15 +118,15 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
     int ierr;
     MPI_Status istatus;
     // 自分が最初に持つ小行列の番号
-    int my_i = myid / BLOCK_LEN, my_j = myid % BLOCK_LEN;
+    int my_i = myid / PROC_SQRT, my_j = myid % PROC_SQRT;
     // 左シフトするPE(縦の番号は同じ)
-    int left_pe = my_i * BLOCK_LEN + (my_j + BLOCK_LEN - 1) % BLOCK_LEN;
-    int right_pe = my_i * BLOCK_LEN + (my_j + 1) % BLOCK_LEN;
+    int left_pe = my_i * PROC_SQRT + (my_j + BLOCK_LEN - 1) % PROC_SQRT;
+    int right_pe = my_i * PROC_SQRT + (my_j + 1) % PROC_SQRT;
     // 上シフトするPE(横の番号は同じ)
-    int up_pe = ((my_i + BLOCK_LEN - 1) % BLOCK_LEN) * BLOCK_LEN + my_j;
-    int down_pe = ((my_i + 1) % BLOCK_LEN) * BLOCK_LEN + my_j;
+    int up_pe = ((my_i + PROC_SQRT - 1) % PROC_SQRT) * PROC_SQRT + my_j;
+    int down_pe = ((my_i + 1) % PROC_SQRT) * PROC_SQRT + my_j;
     //    printf("my_id: %d left: %d righr: %d up: %d down: %d\n", myid, left_pe, right_pe, up_pe, down_pe);
-    for (ope = 0; ope < BLOCK_LEN; ++ope) {
+    for (ope = 0; ope < PROC_SQRT; ++ope) {
         for (i = 0; i < BLOCK_LEN; ++i) 
             for (j = 0; j < BLOCK_LEN; ++j) 
                 for (k = 0; k < BLOCK_LEN; ++k)
