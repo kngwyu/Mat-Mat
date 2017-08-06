@@ -39,8 +39,9 @@ int main(int argc, char* argv[]) {
         dc_inv = 1.0 / (double)RAND_MAX;
         for (i = 0; i < N; ++i) {
             for (j = 0; j < N; ++j) {
-                a[i][j] = rand() * dc_inv;
-                b[i][j] = rand() * dc_inv;
+                a[i][j] = b[i][j] = i * N + j;
+                /* a[i][j] = rand() * dc_inv; */
+                /* b[i][j] = rand() * dc_inv; */
                 c[i][j] = 0.0;
             }
         }
@@ -81,7 +82,7 @@ int main(int argc, char* argv[]) {
     } else {
         for (i = 0; i < N; ++i)
             for (j = 0; j < N; ++j)
-                printf("%d %d %d\n", i, j, c[i][j]);
+                printf("%d %d %lf\n", i, j, c[i][j]);
     }
 END:
     ierr = MPI_Finalize();

@@ -50,13 +50,15 @@ int main(int argc, char* argv[]) {
         dc_inv = 1.0/(double)RAND_MAX;
         for (i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < N; ++j) {
-                a[i][j] = rand() * dc_inv;
+                a[i][j] = (i + myid * BLOCK_LEN) * N + j;
+                /* a[i][j] = rand() * dc_inv; */
                 c[i][j] = 0.0;
             }
         }
         for (i = 0; i < N; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
-                b[i][j] = rand() * dc_inv;
+                b[i][j] = i * N + j + myid * BLOCK_LEN;
+                /* b[i][j] = rand() * dc_inv; */
             }
         }
     } /* end of matrix generation --------------------------*/
@@ -92,10 +94,11 @@ int main(int argc, char* argv[]) {
         if (myid == 0) {
             if (iflag_t == 0) printf(" OK! \n");
         }        
-    } else {
+    }
+    if (PRINT == 1) {
         for (i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < N; ++j) {
-                printf("%d %d %d", i + myid * BLOCK_LEN, j, c[i][j]);
+                printf("%d %d %lf", i + myid * BLOCK_LEN, j, c[i][j]);
             }
         }
     }

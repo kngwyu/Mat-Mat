@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
     static double a[BLOCK_LEN][BLOCK_LEN];
     static double b[BLOCK_LEN][BLOCK_LEN];
     static double c[BLOCK_LEN][BLOCK_LEN];
+    int my_i = myid / BLOCK_LEN, my_j = myid % BLOCK_LEN;
     /* matrix generation --------------------------*/
     if (DEBUG == 1) {
         for (i = 0; i < BLOCK_LEN; ++i) {
@@ -56,8 +57,10 @@ int main(int argc, char* argv[]) {
         dc_inv = 1.0/(double)RAND_MAX;
         for (i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
-                a[i][j] = rand() * dc_inv;
-                b[i][j] = rand() * dc_inv;
+                double num = (my_i * BLOCK_LEN + i) * N + my_j * BLOCK_LEN + j;
+                a[i][j] = b[i][j] = num;
+                /* a[i][j] = rand() * dc_inv; */
+                /* b[i][j] = rand() * dc_inv; */
                 c[i][j] = 0.0;
             }
         }
@@ -97,7 +100,6 @@ int main(int argc, char* argv[]) {
         }
     }
     if (PRINT == 1) {
-        int my_i = myid / BLOCK_LEN, my_j = myid % BLOCK_LEN;
         for (i = 0; i < BLOCK_LEN; ++i)
             for (j = 0; j < BLOCK_LEN; ++j)
                 printf("%d %d %lf\n", i + my_i * BLOCK_LEN, j + my_j * BLOCK_LEN, c[i][j]);
