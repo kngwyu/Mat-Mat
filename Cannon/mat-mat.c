@@ -113,6 +113,7 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
     static double buf_b[BLOCK_LEN][BLOCK_LEN];
     int i, j, k, ope;
     int ierr;
+    MPI_Status istatus;
     // 自分が最初に持つ小行列の番号
     int my_i = myid / BLOCK_LEN, my_j = myid % BLOCK_LEN;
     // 左シフトするPE(縦の番号は同じ)
@@ -121,27 +122,30 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
     // 上シフトするPE(横の番号は同じ)
     int up_pe = ((my_i + BLOCK_LEN - 1) % BLOCK_LEN) * BLOCK_LEN + my_j;
     int down_pe = ((my_i + 1) % BLOCK_LEN) * BLOCK_LEN + my_j;
-    
+    //    printf("my_id: %d left: %d righr: %d up: %d down: %d\n", myid, left_pe, right_pe, up_pe, down_pe);
     for (ope = 0; ope < BLOCK_LEN; ++ope) {
         for (i = 0; i < BLOCK_LEN; ++i) 
             for (j = 0; j < BLOCK_LEN; ++j) 
                 for (k = 0; k < BLOCK_LEN; ++k)
                     c[i][j] += a[i][k] + b[k][j];
-        // Aを左シフト
+        //        Aを左シフト
         if ((my_i & 1) == 0) {  // 先に送信する
-             ierr = MPI_Send(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, myid * N + process_i, MPI_COMM_WORLD);
-             ierr = MPI_Recv(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, right_pe, right_pe * N + process_i, MPI_COMM_WORLD, &istatus);
+            ierr = MPI_Send(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, ope, MPI_COMM_WORLD);
+            ierr = MPI_Recv(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, right_pe, BLOCK_LEN + ope, MPI_COMM_WORLD, &istatus);
         } else {
-            ierr = MPI_Recv(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, right_pe, right_pe * N + process_i, MPI_COMM_WORLD, &istatus);
-            ierr = MPI_Send(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, myid * N + process_i, MPI_COMM_WORLD);
+            ierr = MPI_Recv(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, right_pe, ope, MPI_COMM_WORLD, &istatus);
+            ierr = MPI_Send(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, BLOCK_LEN + ope, MPI_COMM_WORLD);
         }
-        // Bを上シフト
-        if ((my_i & 1) == 0) {  // 先に送信する
-             ierr = MPI_Send(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, myid * N + process_i, MPI_COMM_WORLD);
-             ierr = MPI_Recv(buf_b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, down_pe, down_pe * N + process_i, MPI_COMM_WORLD, &istatus);
-        } else {
-            ierr = MPI_Recv(buf_b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, down_pe, down * N + process_i, MPI_COMM_WORLD, &istatus);
-            ierr = MPI_Send(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, myid * N + process_i, MPI_COMM_WORLD);
-        }
+        /* // Bを上シフト */
+        /* if ((my_j & 1) == 0) {  // 先に送信する */
+        /*     ierr = MPI_Send(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, myid + ope, MPI_COMM_WORLD); */
+        /*     ierr = MPI_Recv(buf_b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, down_pe, down_pe + ope, MPI_COMM_WORLD, &istatus); */
+        /* } else { */
+        /*     ierr = MPI_Recv(buf_b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, down_pe, down_pe + ope, MPI_COMM_WORLD, &istatus); */
+        /*     ierr = MPI_Send(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, myid + ope, MPI_COMM_WORLD); */
+        /* } */
+        /* for (i = 0; i < BLOCK_LEN; ++i) */
+        /*     for (j = 0; j < BLOCK_LEN; ++j) */
+        /*         a[i][j] = buf_a[i][j], b[i][j] = buf_b[i][j]; */
     }
 }
