@@ -71,15 +71,9 @@ int main(int argc, char* argv[]) {
     t0 =  t2 - t1; 
     ierr = MPI_Reduce(&t0, &t_w, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
     /* End of routine --------------------------- */
-
     if (myid == 0) {
-
         printf("N  = %d \n",N);
         printf("Mat-Mat time  = %lf [sec.] \n",t_w);
-
-        d_mflops = 2.0*(double)N*(double)N*(double)N/t_w;
-        d_mflops = d_mflops * 1.0e-6;
-        printf(" %lf [MFLOPS] \n", d_mflops);
     }
 
     if (DEBUG == 1) {
@@ -100,7 +94,6 @@ int main(int argc, char* argv[]) {
         if (myid == 0) {
             if (iflag_t == 0) printf(" OK! \n");
         }
-
     }
 END:
     ierr = MPI_Finalize();

@@ -71,13 +71,8 @@ int main(int argc, char* argv[]) {
     /* End of routine --------------------------- */
 
     if (myid == 0) {
-
         printf("N  = %d \n",N);
         printf("Mat-Mat time  = %lf [sec.] \n",t_w);
-
-        d_mflops = 2.0*(double)N*(double)N*(double)N/t_w;
-        d_mflops = d_mflops * 1.0e-6;
-        printf(" %lf [MFLOPS] \n", d_mflops);
     }
 
     if (DEBUG == 1) {
