@@ -9,8 +9,8 @@
 #define  PROC_SQRT 16
 #define  BLOCK_LEN 32
 
-#define  DEBUG  0
-#define  PRINT  1
+#define  DEBUG  1
+#define  PRINT  0
 #define  EPS    1.0e-18
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
@@ -120,7 +120,7 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
     // 自分が最初に持つ小行列の番号
     int my_i = myid / PROC_SQRT, my_j = myid % PROC_SQRT;
     // 左シフトするPE(縦の番号は同じ)
-    int left_pe = my_i * PROC_SQRT + (my_j + BLOCK_LEN - 1) % PROC_SQRT;
+    int left_pe = my_i * PROC_SQRT + (my_j + PROC_SQRT - 1) % PROC_SQRT;
     int right_pe = my_i * PROC_SQRT + (my_j + 1) % PROC_SQRT;
     // 上シフトするPE(横の番号は同じ)
     int up_pe = ((my_i + PROC_SQRT - 1) % PROC_SQRT) * PROC_SQRT + my_j;
