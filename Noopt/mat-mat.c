@@ -4,7 +4,7 @@
 #include <math.h>
 #include <mpi.h>
 
-#define  N        1024
+#define  N        512
 #define  NPROCS   256
 
 #define  DEBUG  0
@@ -79,7 +79,8 @@ int main(int argc, char* argv[]) {
         if (myid == 0) {
             if (iflag_t == 0) printf(" OK! \n");
         }       
-    } else {
+    }
+    if (PRINT == 1 && myid == 0) {
         for (i = 0; i < N; ++i)
             for (j = 0; j < N; ++j)
                 printf("%d %d %lf\n", i, j, c[i][j]);
