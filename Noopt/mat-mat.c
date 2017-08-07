@@ -4,11 +4,11 @@
 #include <math.h>
 #include <mpi.h>
 
-#define  N        512
+#define  N        4096
 #define  NPROCS   256
 
 #define  DEBUG  0
-#define  PRINT  1
+#define  PRINT  0
 #define  EPS    1.0e-18
 
 int myid, numprocs;

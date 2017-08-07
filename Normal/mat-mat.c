@@ -4,12 +4,12 @@
 #include <math.h>
 #include <mpi.h>
 
-#define  N        512
+#define  N        16384
 #define  NPROCS   256
 #define  BLOCK_LEN (N / NPROCS)
 
 #define  DEBUG  0
-#define  PRINT  1
+#define  PRINT  0
 #define  EPS    1.0e-18
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
