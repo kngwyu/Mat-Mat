@@ -9,8 +9,8 @@
 #define  PROC_SQRT 16
 #define  BLOCK_LEN 32
 
-#define  DEBUG  1
-#define  PRINT  0
+#define  DEBUG  0
+#define  PRINT  1
 #define  EPS    1.0e-18
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
         dc_inv = 1.0/(double)RAND_MAX;
         for (i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
-                double num = (my_i * BLOCK_LEN + i) * N + my_j * BLOCK_LEN + j;
+                double num = (my_i * BLOCK_LEN + i) + my_j * BLOCK_LEN + j;
                 a[i][j] = b[i][j] = num;
                 /* a[i][j] = rand() * dc_inv; */
                 /* b[i][j] = rand() * dc_inv; */
@@ -130,15 +130,14 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
     for (ope = 0; ope < PROC_SQRT; ++ope) {
         // Aを放送する (A00, A11, ...) -> (A01, A12, ...)の順
         int root_j = (my_i + ope) % PROC_SQRT;
-        int bcast_root = my_i * PROC_SQRT + rootj;
-        if (myid == bcast_root) {
-            ierr = MPI_Bcast(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, bcast_root, row_group);
+        if (my_j == root_j) {
+            ierr = MPI_Bcast(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, root_j, row_group);
             for (i = 0; i < BLOCK_LEN; ++i)
                 for (j = 0; j < BLOCK_LEN; ++j) 
                     for (k = 0; k < BLOCK_LEN; ++k)
                         c[i][j] += a[i][k] * b[k][j];
         } else {
-            ierr = MPI_Bcast(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, bcast_root, row_group);
+            ierr = MPI_Bcast(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, root_j, row_group);
             for (i = 0; i < BLOCK_LEN; ++i)
                 for (j = 0; j < BLOCK_LEN; ++j) 
                     for (k = 0; k < BLOCK_LEN; ++k)
