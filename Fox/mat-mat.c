@@ -4,10 +4,10 @@
 #include <math.h>
 #include <mpi.h>
 
-#define  N        16384
+#define  N        32768
 #define  NPROCS   256
 #define  PROC_SQRT 16
-#define  BLOCK_LEN 1024
+#define  BLOCK_LEN 2048
 
 #define  DEBUG  0
 #define  PRINT  0

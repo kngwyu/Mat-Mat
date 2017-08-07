@@ -1,15 +1,15 @@
-// Foxのアルゴリズムによる行列積
+// Summaのアルゴリズムによる行列積(BCast使用)
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <mpi.h>
 
-#define  N        512
+#define  N        32768
 #define  NPROCS   256
 #define  PROC_SQRT 16
-#define  BLOCK_LEN 32
+#define  BLOCK_LEN 2048
 
-#define  DEBUG  1
+#define  DEBUG  0
 #define  PRINT  0
 #define  EPS    1.0e-18
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
         for(i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
                 if (fabs(c[i][j] - (double)N) > EPS) {
-                    printf(" Error! in ( %d , %d )-th argument in PE %d \n", i, j, myid);
+		  printf(" Error! in ( %d , %d )-th argument in PE %d %lf\n", i, j, myid, c[i][j]);
                     iflag = 1;
                     ierr = MPI_Finalize();
                     goto END;
@@ -139,7 +139,7 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
             ierr = MPI_Bcast(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, root_j, row_group);
         }
         // Bを放送する
-        int root_i = ope
+        int root_i = ope;
         if (my_i == root_i) {
             ierr = MPI_Bcast(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, root_i, col_group);
             for (i = 0; i < BLOCK_LEN; ++i)
@@ -151,6 +151,6 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
         for (i = 0; i < BLOCK_LEN; ++i)
             for (j = 0; j < BLOCK_LEN; ++j)
                 for (k = 0; k < BLOCK_LEN; ++k)
-                    c[i][j] = buf_a[i][k] * buf_b[k][j];
+                    c[i][j] += buf_a[i][k] * buf_b[k][j];
     }
 }
