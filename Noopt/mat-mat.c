@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
         dc_inv = 1.0 / (double)RAND_MAX;
         for (i = 0; i < N; ++i) {
             for (j = 0; j < N; ++j) {
-                a[i][j] = b[i][j] = i * N + j;
+                a[i][j] = b[i][j] = i + j;
                 /* a[i][j] = rand() * dc_inv; */
                 /* b[i][j] = rand() * dc_inv; */
                 c[i][j] = 0.0;

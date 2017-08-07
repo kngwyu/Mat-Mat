@@ -50,14 +50,14 @@ int main(int argc, char* argv[]) {
         dc_inv = 1.0/(double)RAND_MAX;
         for (i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < N; ++j) {
-                a[i][j] = (i + myid * BLOCK_LEN) * N + j;
+                a[i][j] = (i + myid * BLOCK_LEN) + j;
                 /* a[i][j] = rand() * dc_inv; */
                 c[i][j] = 0.0;
             }
         }
         for (i = 0; i < N; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
-                b[i][j] = i * N + j + myid * BLOCK_LEN;
+                b[i][j] = i + j + myid * BLOCK_LEN;
                 /* b[i][j] = rand() * dc_inv; */
             }
         }

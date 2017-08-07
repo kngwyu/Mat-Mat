@@ -9,9 +9,9 @@
 #define  PROC_SQRT 16
 #define  BLOCK_LEN 32
 
-#define  DEBUG  1
-#define  PRINT  0
-#define  EPS    1.0e-18
+#define  DEBUG  0
+#define  PRINT  1
+#define  EPS    1.0e-10
 #define  MIN(a, b) ((a) > (b) ? (b) : (a))
 #define  MAX(a, b) ((a) < (b) ? (b) : (a))
 
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
         dc_inv = 1.0/(double)RAND_MAX;
         for (i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
-                double num = (my_i * BLOCK_LEN + i) * N + my_j * BLOCK_LEN + j;
+                double num = (my_i * BLOCK_LEN + i) + my_j * BLOCK_LEN + j;
                 a[i][j] = b[i][j] = num;
                 /* a[i][j] = rand() * dc_inv; */
                 /* b[i][j] = rand() * dc_inv; */
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
         for(i = 0; i < BLOCK_LEN; ++i) {
             for (j = 0; j < BLOCK_LEN; ++j) {
                 if (fabs(c[i][j] - (double)N) > EPS) {
-                    printf(" Error! in ( %d , %d )-th argument in PE %d \n", i, j, myid);
+                    printf(" Error! in ( %d , %d )-th argument in PE %d %ld\n", i, j, myid, c[i][j]);
                     iflag = 1;
                     ierr = MPI_Finalize();
                     goto END;
@@ -111,14 +111,23 @@ END:
 }
 
 void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], double b[BLOCK_LEN][BLOCK_LEN]) {
-    // 一応二つ持つ
-    static double buf_a[BLOCK_LEN][BLOCK_LEN];
-    static double buf_b[BLOCK_LEN][BLOCK_LEN];
     int i, j, k, ope;
     int ierr;
     MPI_Status istatus;
     // 自分が最初に持つ小行列の番号
     int my_i = myid / PROC_SQRT, my_j = myid % PROC_SQRT;
+    {   // 最初のシフト
+        // 左シフトするPE(縦の番号は同じ) my_iだけずらす
+        int left_pe = my_i * PROC_SQRT + (my_j + PROC_SQRT - my_i) % PROC_SQRT;
+        int right_pe = my_i * PROC_SQRT + (my_j + my_i) % PROC_SQRT;
+        // 上シフトするPE(横の番号は同じ) my_jだけずらす
+        int up_pe = ((my_i + PROC_SQRT - my_j) % PROC_SQRT) * PROC_SQRT + my_j;
+        int down_pe = ((my_i + my_j) % PROC_SQRT) * PROC_SQRT + my_j;
+        // Aを左シフト
+        ierr = MPI_Sendrecv_replace(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, ope, right_pe, ope, MPI_COMM_WORLD, &istatus);
+        // Bを上シフト
+        ierr = MPI_Sendrecv_replace(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, ope, down_pe, ope, MPI_COMM_WORLD, &istatus);
+    }
     // 左シフトするPE(縦の番号は同じ)
     int left_pe = my_i * PROC_SQRT + (my_j + PROC_SQRT - 1) % PROC_SQRT;
     int right_pe = my_i * PROC_SQRT + (my_j + 1) % PROC_SQRT;
@@ -130,28 +139,11 @@ void MyMatMat(double c[BLOCK_LEN][BLOCK_LEN], double a[BLOCK_LEN][BLOCK_LEN], do
         for (i = 0; i < BLOCK_LEN; ++i) 
             for (j = 0; j < BLOCK_LEN; ++j) 
                 for (k = 0; k < BLOCK_LEN; ++k)
-                    c[i][j] += a[i][k] + b[k][j];
-        if (ope == BLOCK_LEN - 1) break;
+                    c[i][j] += a[i][k] * b[k][j];
+        if (ope == PROC_SQRT - 1) break;
         //        Aを左シフト
         ierr = MPI_Sendrecv_replace(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, ope, right_pe, ope, MPI_COMM_WORLD, &istatus);
-        /* if ((my_j & 1) == 0) {  // 先に送信する */
-        /*     ierr = MPI_Send(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, ope, MPI_COMM_WORLD); */
-        /*     ierr = MPI_Recv(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, right_pe, ope, MPI_COMM_WORLD, &istatus); */
-        /* } else { */
-        /*     ierr = MPI_Recv(buf_a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, right_pe, ope, MPI_COMM_WORLD, &istatus); */
-        /*     ierr = MPI_Send(a, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, left_pe, ope, MPI_COMM_WORLD); */
-        /* } */
         // Bを上シフト
         ierr = MPI_Sendrecv_replace(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, ope, down_pe, ope, MPI_COMM_WORLD, &istatus);
-        /* if ((my_i & 1) == 0) {  // 先に送信する */
-        /*     ierr = MPI_Send(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, ope, MPI_COMM_WORLD); */
-        /*     ierr = MPI_Recv(buf_b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, down_pe, ope, MPI_COMM_WORLD, &istatus); */
-        /* } else { */
-        /*     ierr = MPI_Recv(buf_b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, down_pe, ope, MPI_COMM_WORLD, &istatus); */
-        /*     ierr = MPI_Send(b, BLOCK_LEN * BLOCK_LEN, MPI_DOUBLE, up_pe, ope, MPI_COMM_WORLD); */
-        /* } */
-        /* for (i = 0; i < BLOCK_LEN; ++i) */
-        /*     for (j = 0; j < BLOCK_LEN; ++j) */
-        /*         a[i][j] = buf_a[i][j], b[i][j] = buf_b[i][j]; */
     }
 }
